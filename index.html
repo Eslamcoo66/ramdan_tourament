@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>تطبيق دورة رمضانية</title>
+<style>
+body { font-family: Arial; direction: rtl; text-align: right; padding:20px; background:#f5f5f5; }
+table { border-collapse: collapse; width: 100%; margin-top:20px; background:#fff; }
+th, td { border: 1px solid #999; padding: 8px; text-align: center; }
+th { background: #007BFF; color: white; }
+img { width:25px; height:25px; vertical-align:middle; margin-left:5px; }
+button { padding: 8px 12px; margin-top:10px; background:#28a745; color:white; border:none; cursor:pointer; }
+button:hover { background:#218838; }
+.group-container {margin-bottom:50px;}
+</style>
+</head>
+<body>
+
+<h1>تطبيق دورة رمضانية</h1>
+
+<div class="group-container">
+<h2>المجموعة A</h2>
+<div>
+<label>الفريق الأول: </label>
+<select id="team1SelectA"></select>
+<label>الأهداف: </label>
+<input type="number" id="score1A" min="0" value="0">
+</div>
+<div>
+<label>الفريق الثاني: </label>
+<select id="team2SelectA"></select>
+<label>الأهداف: </label>
+<input type="number" id="score2A" min="0" value="0">
+</div>
+<button onclick="addMatch('A')">إضافة نتيجة المباراة</button>
+<div id="tableA"></div>
+</div>
+
+<div class="group-container">
+<h2>المجموعة B</h2>
+<div>
+<label>الفريق الأول: </label>
+<select id="team1SelectB"></select>
+<label>الأهداف: </label>
+<input type="number" id="score1B" min="0" value="0">
+</div>
+<div>
+<label>الفريق الثاني: </label>
+<select id="team2SelectB"></select>
+<label>الأهداف: </label>
+<input type="number" id="score2B" min="0" value="0">
+</div>
+<button onclick="addMatch('B')">إضافة نتيجة المباراة</button>
+<div id="tableB"></div>
+</div>
+
+<div class="group-container">
+<h2>المجموعة E</h2>
+<div>
+<label>الفريق الأول: </label>
+<select id="team1SelectE"></select>
+<label>الأهداف: </label>
+<input type="number" id="score1E" min="0" value="0">
+</div>
+<div>
+<label>الفريق الثاني: </label>
+<select id="team2SelectE"></select>
+<label>الأهداف: </label>
+<input type="number" id="score2E" min="0" value="0">
+</div>
+<button onclick="addMatch('E')">إضافة نتيجة المباراة</button>
+<div id="tableE"></div>
+</div>
+
+<div class="group-container">
+<h2>المجموعة F</h2>
+<div>
+<label>الفريق الأول: </label>
+<select id="team1SelectF"></select>
+<label>الأهداف: </label>
+<input type="number" id="score1F" min="0" value="0">
+</div>
+<div>
+<label>الفريق الثاني: </label>
+<select id="team2SelectF"></select>
+<label>الأهداف: </label>
+<input type="number" id="score2F" min="0" value="0">
+</div>
+<button onclick="addMatch('F')">إضافة نتيجة المباراة</button>
+<div id="tableF"></div>
+</div>
+
+<script>
+const groups = {
+"A":["أصدقاء عبدالوهاب","شباب الشوكة","محلة كيل","أصدقاء حوش عيسي","شباب كوم البوص","الغراقة الغربية"],
+"B":["الشوكة الحاجر","الريف المصري","الصوالحية","أصدقاء محمد فؤاد","الزمالكاوية","البرنوجي"],
+"E":["ممتاز","كوم البوص","نجع العزايم","عزبة الست","أنصاف","أصدقاء أسامة الجارحي"],
+"F":["نجوم بطورس","الديابة","كوم القناطر","المحطة","الحريفة","الغراقة الشرقية"]
+};
+
+// شعارات رمزية (Base64 مؤقتة)
+const logos = {};
+for(let g in groups){
+  groups[g].forEach(t=>{
+    logos[t]="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAJ0lEQVRYR+3PsQkAIBDDsPv/pUZoAwmB2SLw5A3UoSoQOJoGJAKGGAQjI4IAAApF0HJ7VwccgAAAABJRU5ErkJggg=="; 
+  });
+}
+
+// بيانات الفرق لكل مجموعة
+const data = {};
+for(let g in groups){ data[g]={}; groups[g].forEach(t=>{ data[g][t]={MP:0,W:0,D:0,L:0,GF:0,GA:0,GD:0,Pts:0}; }); }
+
+// تهيئة القوائم المنسدلة
+function initSelects(group){
+  const t1=document.getElementById("team1Select"+group);
+  const t2=document.getElementById("team2Select"+group);
+  t1.innerHTML=""; t2.innerHTML="";
+  groups[group].forEach(t=>{
+    let o1=document.createElement("option"); o1.value=t; o1.text=t; t1.add(o1);
+    let o2=document.createElement("option"); o2.value=t; o2.text=t; t2.add(o2);
+  });
+}
+["A","B","E","F"].forEach(g=>initSelects(g));
+
+function addMatch(group){
+  const t1 = document.getElementById("team1Select"+group).value;
+  const t2 = document.getElementById("team2Select"+group).value;
+  const s1 = parseInt(document.getElementById("score1"+group).value);
+  const s2 = parseInt(document.getElementById("score2"+group).value);
+  if(t1===t2){ alert("لا يمكن اختيار نفس الفريق!"); return; }
+  const d1=data[group][t1]; const d2=data[group][t2];
+  d1.MP++; d2.MP++;
+  d1.GF+=s1; d1.GA+=s2; d1.GD=d1.GF-d1.GA;
+  d2.GF+=s2; d2.GA+=s1; d2.GD=d2.GF-d2.GA;
+  if(s1>s2){ d1.W++; d2.L++; } else if(s1<s2){ d2.W++; d1.L++; } else { d1.D++; d2.D++; }
+  d1.Pts=d1.W*3+d1.D; d2.Pts=d2.W*3+d2.D;
+  renderTable(group);
+}
+
+function renderTable(group){
+  const container=document.getElementById("table"+group); container.innerHTML="";
+  const table=document.createElement("table");
+  const header=table.insertRow();
+  ["الفريق","لعب","فوز","تعادل","خسارة","GF","GA","GD","Pts"].forEach(h=>{ const th=document.createElement("th"); th.innerText=h; header.appendChild(th); });
+  const rows=Object.keys(data[group]).map(t=>({name:t,...data[group][t]}));
+  rows.sort((a,b)=>b.Pts-a.Pts||b.GD-a.GD);
+  rows.forEach(r=>{
+    const row=table.insertRow();
+    const cellName=row.insertCell();
+    const img=document.createElement("img"); img.src=logos[r.name]; img.alt=""; 
+    cellName.appendChild(document.createTextNode(r.name)); cellName.appendChild(img);
+    [r.MP,r.W,r.D,r.L,r.GF,r.GA,r.GD,r.Pts].forEach(v=>{ const c=row.insertCell(); c.innerText=v; });
+  });
+  container.appendChild(table);
+}
+["A","B","E","F"].forEach(g=>renderTable(g));
+</script>
+</body>
+</html>
